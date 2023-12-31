@@ -2,23 +2,25 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/Counter.sol";
+import "../src/SendBack.sol";
 
 contract CounterTest is Test {
-    Counter public counter;
+  SendBack public sendBack;
 
-    function setUp() public {
-        counter = new Counter();
-        counter.setNumber(0);
-    }
+  uint256 internal ownerPrivateKey;
+  address internal owner;
 
-    function testIncrement() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
-    }
+  function setUp() public {
+    sendBack = new SendBack();
+  }
 
-    function testSetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
-    }
+  function testSendBack() public {
+    vm.deal(owner, 10 ether);
+    vm.prank(owner);
+    uint256 balanceBefore = address(owner).balance;
+    (bool success, ) = address(sendBack).call{value: 10 ether}("");
+    require(success, "fail send eth to contract");
+    uint256 balanceAfter = address(owner).balance;
+    require(balanceBefore == balanceAfter, "fail test send back");
+  }
 }
